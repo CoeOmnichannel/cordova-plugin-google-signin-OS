@@ -82,7 +82,7 @@ module.exports = function(context) {
 
   var wwwPath = getResourcesFolderPath(context, platform, platformConfig);
 
-
+  console.log(wwwPath);
   var files = getFilesFromPath(wwwPath);
   if (!files) {
     handleError("No directory found", defer);
