@@ -20,6 +20,11 @@ var constants = {
 };
 
 function getResourcesFolderPath(context, platform, platformConfig) {
+  console.log('context.opts.projectRoot ' + context.opts.projectRoot);
+  console.log('constants.platforms ' + constants.platforms);
+  console.log('platform ' + platform);
+  console.log('platformPath ' + platformPath);
+  console.log('www '+ platformConfig.wwwFolder);
   var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
   return path.join(platformPath, platformConfig.wwwFolder);
 }
@@ -79,10 +84,9 @@ module.exports = function(context) {
   if (!platformConfig) {
     handleError("Invalid platform", defer);
   }
-
+  
   var wwwPath = getResourcesFolderPath(context, platform, platformConfig);
-
-  console.log(wwwPath);
+  
   var files = getFilesFromPath(wwwPath);
   if (!files) {
     handleError("No directory found", defer);
