@@ -1,7 +1,7 @@
 var exec = require('cordova/exec');
 
 exports.signIn = function (success, error, options) {
-  exec(success, error, 'GoogleSignInPlugin', 'signIn', [options.scopes || ""]);
+  exec(success, error, 'GoogleSignInPlugin', 'signIn', [options.scopes || '']);
 };
 
 exports.isSignedIn = function (success, error) {
@@ -9,7 +9,7 @@ exports.isSignedIn = function (success, error) {
 };
 
 exports.signOut = function (success, error, options) {
-  exec(success, error, 'GoogleSignInPlugin', 'signOut', [options.scopes || ""]);
+  exec(success, error, 'GoogleSignInPlugin', 'signOut', [options.scopes || '']);
 };
 
 exports.disconnect = function (success, error) {
