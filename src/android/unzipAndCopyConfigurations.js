@@ -93,7 +93,7 @@ module.exports = function(context) {
   }
 
   var fileName = files.find(function (name) {
-    return name.endsWith(extension);
+    return name.endsWith(constants.extension);
   });
   if (!fileName) {
     handleError("No file found", defer);
