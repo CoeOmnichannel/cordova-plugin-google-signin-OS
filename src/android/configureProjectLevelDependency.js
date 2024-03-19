@@ -30,7 +30,9 @@ function addProjectLevelDependency(platformRoot) {
 
 module.exports = context => {
     "use strict";
-    const platformRoot = path.join(context.opts.projectRoot, "platforms/android");
+    //const platformRoot = path.join(context.opts.projectRoot, "platforms/android");
+    const platformRoot = path.join(context.opts.projectRoot, constants.platforms,  "platforms/android");
+    platformRoot = path.join(platformPath, platformConfig.wwwFolder);
 
     return new Promise((resolve, reject) => {
         addProjectLevelDependency(platformRoot);
