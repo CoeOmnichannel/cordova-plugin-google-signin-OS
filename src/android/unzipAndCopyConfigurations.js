@@ -4,7 +4,15 @@ var path = require("path");
 
 var constants = {
   googleServices: "google-services",
-  platform: "android",
+  android: {
+    platform: "android",
+    wwwFolder: "assets/www",
+    firebaseFileExtension: ".json",
+    soundFileName: "push_sound.wav",
+    getSoundDestinationFolder: function() {
+      return "platforms/android/res/raw";
+    }
+  },
   wwwFolder: "assets/www",
   extension: ".json"
 };
@@ -12,20 +20,6 @@ var constants = {
 function getResourcesFolderPath(context, platform, platformConfig) {
   var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
   return path.join(platformPath, platformConfig.wwwFolder);
-}
-
-function getSourceFolderPath(context, wwwPath) {
-  var sourceFolderPath;
-  var cordovaAbove7 = isCordovaAbove(context, 7);
-
-  // New way of looking for the configuration files' folder
-  if (cordovaAbove7) {
-    sourceFolderPath = path.join(context.opts.projectRoot, "www");
-  } else {
-    sourceFolderPath = path.join(wwwPath);
-  }
-
-  return sourceFolderPath;
 }
 
 function isCordovaAbove(context, version) {
@@ -59,6 +53,14 @@ function checkIfFolderExists(path) {
   return fs.existsSync(path);
 }
 
+function getPlatformConfigs(platform) {
+  if (platform === constants.android.platform) {
+    return constants.android;
+  } else if (platform === constants.ios.platform) {
+    return constants.ios;
+  }
+}
+
 module.exports = function(context) {
   
   var cordovaAbove8 = isCordovaAbove(context, 8);
@@ -71,7 +73,7 @@ module.exports = function(context) {
   }
   
   var platform = context.opts.plugin.platform;
-  var platformConfig = utils.getPlatformConfigs(platform);
+  var platformConfig = getPlatformConfigs(platform);
   if (!platformConfig) {
     handleError("Invalid platform", defer);
   }
@@ -79,7 +81,7 @@ module.exports = function(context) {
   var wwwPath = getResourcesFolderPath(context, platform, platformConfig);
 
 
-  var files = utils.getFilesFromPath(wwwPath);
+  var files = getFilesFromPath(wwwPath);
   if (!files) {
     handleError("No directory found", defer);
   }
