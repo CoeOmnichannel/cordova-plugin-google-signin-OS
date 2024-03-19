@@ -20,18 +20,12 @@ var constants = {
 };
 
 function getResourcesFolderPath(context, platform, platformConfig) {
-  console.log('context.opts.projectRoot ' + context.opts.projectRoot);
-  console.log('constants.platforms ' + constants.platforms);
-  console.log('platform ' + platform);
-  console.log('platformPath ' + platformPath);
-  console.log('www '+ platformConfig.wwwFolder);
   var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
   return path.join(platformPath, platformConfig.wwwFolder);
 }
 
 function isCordovaAbove(context, version) {
   var cordovaVersion = context.opts.cordova.version;
-  console.log(cordovaVersion);
   var sp = cordovaVersion.split('.');
   return parseInt(sp[0]) >= version;
 }
