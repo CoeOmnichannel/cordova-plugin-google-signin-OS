@@ -8,7 +8,8 @@ var utils = require("./utilities");
 var constants = {
   googleServices: "google-services",
   platform: "android",
-  wwwFolder: "assets/www"
+  wwwFolder: "assets/www",
+  extension: ".json"
 };
 
 function getResourcesFolderPath(context, platform, platformConfig) {
@@ -75,7 +76,7 @@ module.exports = function(context) {
   }
 
   var fileName = files.find(function (name) {
-    return name.endsWith(platformConfig.firebaseFileExtension);
+    return name.endsWith(extension);
   });
   if (!fileName) {
     handleError("No file found", defer);
