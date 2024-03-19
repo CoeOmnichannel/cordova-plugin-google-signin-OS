@@ -8,14 +8,14 @@ var constants = {
   googleServices: "google-services",
   android: {
     platform: "android",
-    wwwFolder: "assets/www",
+    wwwFolder: "app/src/main/assets/www",
     firebaseFileExtension: ".json",
     soundFileName: "push_sound.wav",
     getSoundDestinationFolder: function() {
       return "platforms/android/res/raw";
     }
   },
-  wwwFolder: "assets/www",
+  wwwFolder: "app/src/main/assets/www",
   extension: ".json"
 };
 
