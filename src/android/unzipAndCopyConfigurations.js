@@ -1,9 +1,6 @@
 "use strict";
 
 var path = require("path");
-var AdmZip = require("adm-zip");
-
-var utils = require("./utilities");
 
 var constants = {
   googleServices: "google-services",
@@ -64,13 +61,25 @@ function checkIfFolderExists(path) {
 
 module.exports = function(context) {
   
+  var cordovaAbove8 = isCordovaAbove(context, 8);
+  var cordovaAbove7 = isCordovaAbove(context, 7);
+  var defer;
+  if (cordovaAbove8) {
+    defer = require("q").defer();
+  } else {
+    defer = context.requireCordovaModule("q").defer();
+  }
+  
   var platform = context.opts.plugin.platform;
-  var platformConfig = constants.platform(platform);
+  var platformConfig = utils.getPlatformConfigs(platform);
   if (!platformConfig) {
     handleError("Invalid platform", defer);
   }
-  
-  var files = getFilesFromPath(targetPath);
+
+  var wwwPath = getResourcesFolderPath(context, platform, platformConfig);
+
+
+  var files = utils.getFilesFromPath(wwwPath);
   if (!files) {
     handleError("No directory found", defer);
   }
@@ -82,7 +91,7 @@ module.exports = function(context) {
     handleError("No file found", defer);
   }
 
-  var sourceFilePath = path.join(targetPath, fileName);
+  var sourceFilePath = path.join(wwwPath, fileName);
   var destFilePath = path.join(context.opts.plugin.dir, fileName);
 
   copyFromSourceToDestPath(defer, sourceFilePath, destFilePath);
