@@ -3,6 +3,7 @@
 var path = require("path");
 
 var constants = {
+  platforms: "platforms",
   googleServices: "google-services",
   android: {
     platform: "android",
