@@ -8,8 +8,8 @@ exports.isSignedIn = function (success, error) {
   exec(success, error, 'GoogleSignInPlugin', 'isSignedIn');
 };
 
-exports.signOut = function (success, error, options) {
-  exec(success, error, 'GoogleSignInPlugin', 'signOut', [options]);
+exports.signOut = function (success, error) {
+  exec(success, error, 'GoogleSignInPlugin', 'signOut');
 };
 
 exports.disconnect = function (success, error) {
