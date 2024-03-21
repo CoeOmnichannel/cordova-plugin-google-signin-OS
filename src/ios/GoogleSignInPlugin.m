@@ -57,7 +57,7 @@
     GIDConfiguration *config = [[GIDConfiguration alloc] initWithClientID:clientId];
     
     GIDSignIn *signIn = GIDSignIn.sharedInstance;
-    
+
     NSString* scopesString = command.arguments[0];
     NSArray* scopes = [scopesString componentsSeparatedByString:@" "];
     
@@ -74,6 +74,8 @@
                            @"email"            : email,
                            @"id"               : userId,
                            @"id_token"         : user.authentication.idToken,
+                           @"access_token"     : user.authentication.accessToken,
+                           @"refresh_token"    : user.authentication.refreshToken,
                            @"display_name"     : user.profile.name       ? : [NSNull null],
                            @"given_name"       : user.profile.givenName  ? : [NSNull null],
                            @"family_name"      : user.profile.familyName ? : [NSNull null],
@@ -136,7 +138,7 @@
 
 - (void) isSignedIn:(CDVInvokedUrlCommand*)command {
     // bool isSignedIn = [GIDSignIn.sharedInstance currentUser] != nil;
-// NSDictionary *details = @{@"status": @"success", @"message": (isSignedIn) ? @"true" : @"false"};
+    // NSDictionary *details = @{@"status": @"success", @"message": (isSignedIn) ? @"true" : @"false"};
     // CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self toJSONString:details]];
     // [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 
