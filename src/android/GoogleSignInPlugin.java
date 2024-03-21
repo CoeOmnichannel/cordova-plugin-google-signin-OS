@@ -280,6 +280,8 @@ public class GoogleSignInPlugin extends CordovaPlugin {
                                 JSONObject userInfo = new JSONObject();
                                 userInfo.put("id", user.getUid());
                                 userInfo.put("display_name", user.getDisplayName());
+                                userInfo.put("given_name", user.getGivenName());
+                                userInfo.put("family_name", user.getFamilyName());
                                 userInfo.put("email", user.getEmail());
                                 userInfo.put("photo_url", user.getPhotoUrl());
                                 userInfo.put("id_token", getTokenResult.getToken());
