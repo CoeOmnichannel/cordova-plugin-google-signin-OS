@@ -57,8 +57,11 @@
     GIDConfiguration *config = [[GIDConfiguration alloc] initWithClientID:clientId];
     
     GIDSignIn *signIn = GIDSignIn.sharedInstance;
+
+    NSString* scopesString = command.arguments[0];
+    NSArray* scopes = [scopesString componentsSeparatedByString:@" "];
     
-    [signIn signInWithConfiguration:config presentingViewController:self.viewController callback:^(GIDGoogleUser * _Nullable user, NSError * _Nullable error) {
+    [signIn signInWithConfiguration:config presentingViewController:self.viewController hint:@"" additionalScopes:scopes callback:^(GIDGoogleUser * _Nullable user, NSError * _Nullable error) {
         if (error) {
             NSDictionary *errorDetails = @{@"status": @"error", @"message": error.localizedDescription};
             CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self toJSONString:errorDetails]];
@@ -71,6 +74,8 @@
                            @"email"            : email,
                            @"id"               : userId,
                            @"id_token"         : user.authentication.idToken,
+                           @"access_token"     : user.authentication.accessToken,
+                           @"refresh_token"    : user.authentication.refreshToken,
                            @"display_name"     : user.profile.name       ? : [NSNull null],
                            @"given_name"       : user.profile.givenName  ? : [NSNull null],
                            @"family_name"      : user.profile.familyName ? : [NSNull null],
@@ -132,7 +137,12 @@
 }
 
 - (void) isSignedIn:(CDVInvokedUrlCommand*)command {
-    bool isSignedIn = [GIDSignIn.sharedInstance currentUser] != nil;
+    // bool isSignedIn = [GIDSignIn.sharedInstance currentUser] != nil;
+    // NSDictionary *details = @{@"status": @"success", @"message": (isSignedIn) ? @"true" : @"false"};
+    // CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self toJSONString:details]];
+    // [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+    bool isSignedIn = [GIDSignIn.sharedInstance hasPreviousSignIn];
     NSDictionary *details = @{@"status": @"success", @"message": (isSignedIn) ? @"true" : @"false"};
     CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self toJSONString:details]];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
