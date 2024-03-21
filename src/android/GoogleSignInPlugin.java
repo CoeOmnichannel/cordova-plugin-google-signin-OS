@@ -220,14 +220,45 @@ public class GoogleSignInPlugin extends CordovaPlugin {
         });
     }
 
-    private void respondWithGoogleToken(String idToken) {
-        try {
-            JSONObject userInfo = new JSONObject();
-            userInfo.put("id_token", idToken);
-            mCallbackContext.success(getSuccessMessageForOneTapLogin(userInfo));
-        } catch (Exception ex) {
-            mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
-        }
+    private void firebaseAuthWithGoogle(String googleIdToken, String serverAuthCode, String accessToken) {
+        AuthCredential credentials = GoogleAuthProvider.getCredential(googleIdToken, null);
+        mAuth.signInWithCredential(credentials).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                if(task.isSuccessful()) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    user.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
+                        @Override
+                        public void onSuccess(GetTokenResult getTokenResult) {
+                            try {
+                                JSONObject userInfo = new JSONObject();
+                                userInfo.put("id", user.getUid());
+                                userInfo.put("display_name", user.getDisplayName());
+                                userInfo.put("email", user.getEmail());
+                                userInfo.put("photo_url", user.getPhotoUrl());
+                                userInfo.put("id_token", getTokenResult.getToken());
+                                userInfo.put("server_auth_code", serverAuthCode);
+                                userInfo.put("access_token", accessToken);
+                                mCallbackContext.success(getSuccessMessageForOneTapLogin(userInfo));
+                            } catch (Exception ex) {
+                                mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception ex) {
+                            mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
+                        }
+                    });
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception ex) {
+                mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
+            }
+        });
     }
 
     private GoogleSignInOptions getGoogleSignInOptions() {
