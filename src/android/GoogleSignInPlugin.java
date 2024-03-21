@@ -217,7 +217,7 @@ public class GoogleSignInPlugin extends CordovaPlugin {
         if(shouldShowOneTapUI) {
             cordova.setActivityResultCallback(this);
             mOneTapSigninClient = Identity.getSignInClient(mContext);
-            mSigninRequest = BeginSignInRequest.builder()
+            mSiginRequest = BeginSignInRequest.builder()
                     .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder().build())
                     .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                             .setSupported(true)
@@ -227,7 +227,7 @@ public class GoogleSignInPlugin extends CordovaPlugin {
                     .setAutoSelectEnabled(true)
                     .build();
 
-            mOneTapSigninClient.beginSignIn(mSigninRequest)
+            mOneTapSigninClient.beginSignIn(mSiginRequest)
                     .addOnSuccessListener(new OnSuccessListener<BeginSignInResult>() {
                         @Override
                         public void onSuccess(BeginSignInResult beginSignInResult) {
@@ -285,8 +285,6 @@ mAuth.signOut();
             JSONObject userInfo = new JSONObject();
             userInfo.put("id", user.getUid());
                                 userInfo.put("display_name", user.getDisplayName());
-                                userInfo.put("given_name", user.getGivenName());
-                                userInfo.put("family_name", user.getFamilyName());
                                 userInfo.put("email", user.getEmail());
                                 userInfo.put("photo_url", user.getPhotoUrl());
                                 userInfo.put("id_token", getTokenResult.getToken());
