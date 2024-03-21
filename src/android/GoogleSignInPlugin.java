@@ -436,7 +436,44 @@ public class GoogleSignInPlugin extends CordovaPlugin {
     }
 
     private SharedPreferences getSharedPreferences() {
-        return mContext.getSharedPreferences(Constants.PREF_FILENAME, Context.MODE_PRIVATE);
+         return mContext.getSharedPreferences(Constants.PREF_FILENAME, Context.MODE_PRIVATE);
+    }
+
+    private void getAuthToken(Activity activity, Account account, boolean retry, AccessTokenCallback callback) {
+        final String mScopes = this.mScopes;
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                AccountManager manager = AccountManager.get(activity);
+                AccountManagerFuture<Bundle> future = manager.getAuthToken(account, "oauth2:profile email " + mScopes, null, activity, null, null);
+                String authToken = "";
+
+                try {
+                    Bundle bundle = future.getResult();
+                    authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+
+                    System.out.println("AUTH TOKEN: " + authToken);
+                    
+                    // return verifyToken(authToken);
+                    JSONObject verifiedToken = verifyToken(authToken);
+                    if(callback != null) {
+                        callback.onToken(verifiedToken.get("accessToken").toString());
+                    }
+                } catch (IOException e) {
+                    System.out.println("IOException: " + e.getMessage());
+
+                    if (retry) {
+                        manager.invalidateAuthToken("com.google", authToken);
+                        getAuthToken(activity, account, false, callback);
+                        return null;
+                    }
+                    else {
+                        if(callback != null) {
+                            callback.onTokenError(e.getMessage());
+                        }
+                    }
+                } catch (AuthenticatorException e) {
+                    System.out.println("AuthenticatorException: " + e.getMessage());
 
                     if(callback != null) {
                         callback.onTokenError(e.getMessage());
