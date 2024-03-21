@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -67,14 +66,12 @@ public class GoogleSignInPlugin extends CordovaPlugin {
 
     private static final int RC_SIGN_IN = 101;
     private static final int RC_ONE_TAP = 102;
-    private static final int CANCELLATION_LIMIT = 3;
-    private static final float FIFTEEN_MINUTES = 1000 * 60 * 15L;
 
     private GoogleSignInAccount account;
     private FirebaseAuth mAuth;
 
     private SignInClient mOneTapSigninClient;
-    private BeginSignInRequest mSigninRequest;
+    private BeginSignInRequest mSiginRequest;
 
     private Context mContext;
     private Activity mCurrentActivity;
@@ -111,7 +108,7 @@ public class GoogleSignInPlugin extends CordovaPlugin {
             this.disconnect(callbackContext);
             return true;
         } else if (action.equals(Constants.CORDOVA_ACTION_SIGNIN)) {
-//Firas
+            //Firas
             this.mScopes = args.getString(0);
             if(this.mScopes == null || this.mScopes.trim().isEmpty()) {
                 this.mScopes = "";
@@ -119,7 +116,7 @@ public class GoogleSignInPlugin extends CordovaPlugin {
             this.signIn(callbackContext);
             return true;
         } else if (action.equals(Constants.CORDOVA_ACTION_SIGNOUT)) {
-//Firas
+            //Firas
             this.mScopes = args.getString(0);
             if(this.mScopes == null || this.mScopes.trim().isEmpty()) {
                 this.mScopes = "";
@@ -161,13 +158,13 @@ public class GoogleSignInPlugin extends CordovaPlugin {
             try {
                 SignInCredential credential = mOneTapSigninClient.getSignInCredentialFromIntent(data);
                 firebaseAuthWithGoogle(credential.getGoogleIdToken(), "", "");
-} catch(ApiException ex) {
+            } catch(ApiException ex) {
                 String errorMessage = "";
                 switch (ex.getStatusCode()) {
                     case CommonStatusCodes.CANCELED:
                         errorMessage = "One Tap Signin was denied by the user.";
-                                                    beginOneTapSigninCoolingPeriod();
-                                                break;
+                        beginOneTapSigninCoolingPeriod();
+                        break;
                     default:
                         errorMessage = ex.getLocalizedMessage();
                         break;
@@ -215,24 +212,22 @@ public class GoogleSignInPlugin extends CordovaPlugin {
         if(shouldShowOneTapUI) {
             cordova.setActivityResultCallback(this);
             mOneTapSigninClient = Identity.getSignInClient(mContext);
-            mSigninRequest = BeginSignInRequest.builder()
+            mSiginRequest = BeginSignInRequest.builder()
                     .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder().build())
                     .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                             .setSupported(true)
-                                                                        .setFilterByAuthorizedAccounts(false)
-.setServerClientId(this.cordova.getActivity().getResources().getString(getAppResource("default_client_id", "string")))
-                                    .build())
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId(this.cordova.getActivity().getResources().getString(getAppResource("default_client_id", "string")))
+                            .build())
                     .setAutoSelectEnabled(true)
                     .build();
 
-            mOneTapSigninClient.beginSignIn(mSigninRequest)
+            mOneTapSigninClient.beginSignIn(mSiginRequest)
                     .addOnSuccessListener(new OnSuccessListener<BeginSignInResult>() {
                         @Override
                         public void onSuccess(BeginSignInResult beginSignInResult) {
                             try {
-                                mCurrentActivity.startIntentSenderForResult(
-                                        beginSignInResult.getPendingIntent().getIntentSender(), RC_ONE_TAP, null, 0, 0,
-                                        0);
+                                mCurrentActivity.startIntentSenderForResult(beginSignInResult.getPendingIntent().getIntentSender(), RC_ONE_TAP, null, 0, 0, 0);
                             } catch (IntentSender.SendIntentException ex) {
                                 ex.printStackTrace();
                                 mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
@@ -246,7 +241,7 @@ public class GoogleSignInPlugin extends CordovaPlugin {
                         }
                     });
         } else {
-            mCallbackContext.error(getErrorMessageInJsonString("Cooling period is active, wait fifteen minutes"));
+            mCallbackContext.error(getErrorMessageInJsonString("One Tap Signin was denied by the user."));
         }
     }
 
@@ -259,10 +254,10 @@ public class GoogleSignInPlugin extends CordovaPlugin {
             public void onComplete(@NonNull Task<Void> task) {
                 account = null;
                 mCallbackContext.success(getSuccessMessageInJsonString("Logged out"));
-mAuth.signOut();
+                mAuth.signOut();
             }
         });
-        mOneTapSigninClient.signOut().addOnFailureListener(new OnFailureListener() {
+        mGoogleSignInClient.signOut().addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception ex) {
                 mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
@@ -281,20 +276,20 @@ mAuth.signOut();
                     user.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                         @Override
                         public void onSuccess(GetTokenResult getTokenResult) {
-        try {
-            JSONObject userInfo = new JSONObject();
-            userInfo.put("id", user.getUid());
+                            try {
+                                JSONObject userInfo = new JSONObject();
+                                userInfo.put("id", user.getUid());
                                 userInfo.put("display_name", user.getDisplayName());
                                 userInfo.put("email", user.getEmail());
                                 userInfo.put("photo_url", user.getPhotoUrl());
                                 userInfo.put("id_token", getTokenResult.getToken());
                                 userInfo.put("server_auth_code", serverAuthCode);
                                 userInfo.put("access_token", accessToken);
-            mCallbackContext.success(getSuccessMessageForOneTapLogin(userInfo));
-        } catch (Exception ex) {
-            mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
-        }
-}
+                                mCallbackContext.success(getSuccessMessageForOneTapLogin(userInfo));
+                            } catch (Exception ex) {
+                                mCallbackContext.error(getErrorMessageInJsonString(ex.getMessage()));
+                            }
+                        }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception ex) {
@@ -312,7 +307,7 @@ mAuth.signOut();
     }
 
     private GoogleSignInOptions getGoogleSignInOptions() {
-//Firas
+        //Firas
         GoogleSignInOptions.Builder gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN);
         for (String scope : this.mScopes.split(" ")) {
             System.out.println("REQUST_SCOPE: " + scope);
@@ -327,10 +322,10 @@ mAuth.signOut();
     private GoogleSignInOptions getGoogleSignInOptions_FIXED() {
         //Firas
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"), new Scope("https://www.googleapis.com/auth/drive"), new Scope("https://www.googleapis.com/auth/drive.appdata"), new Scope("https://www.googleapis.com/auth/drive.readonly"), new Scope("https://www.googleapis.com/auth/drive.file"), new Scope("https://www.googleapis.com/auth/drive.metadata"), new Scope("https://www.googleapis.com/auth/drive.metadata.readonly"))
+            .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"), new Scope("https://www.googleapis.com/auth/drive"), new Scope("https://www.googleapis.com/auth/drive.appdata"), new Scope("https://www.googleapis.com/auth/drive.readonly"), new Scope("https://www.googleapis.com/auth/drive.file"), new Scope("https://www.googleapis.com/auth/drive.metadata"), new Scope("https://www.googleapis.com/auth/drive.metadata.readonly"))
             .requestIdToken(this.cordova.getActivity().getResources().getString(getAppResource("default_client_id", "string")))
-                .requestEmail()
-                .build();
+            .requestEmail()
+            .build();
         return gso;
     }
 
@@ -356,48 +351,8 @@ mAuth.signOut();
             SharedPreferences.Editor preferences = sharedPreferences.edit();
             preferences.putBoolean(Constants.PREF_SHOW_ONE_TAP_UI, true);
             preferences.putLong(Constants.PREF_COOLING_START_TIME, 0L);
-            preferences.putString(Constants.PREF_CANCEL_TIME_ARRAY_STRING, "");
             preferences.apply();
         }
-    }
-
-    private Boolean hasCancelledThriceInLastFifteenMinutes() {
-        SharedPreferences sharedPreferences = getSharedPreferences();
-        String cancelTimeArrayString = sharedPreferences.getString(Constants.PREF_CANCEL_TIME_ARRAY_STRING, "");
-        ArrayList<Number> newCancelTimeArray = new ArrayList<Number>();
-        long now = new Date().getTime();
-
-        newCancelTimeArray.add(now);
-
-        if (cancelTimeArrayString.isEmpty()) {
-            saveCancelTime(newCancelTimeArray);
-            return false;
-        }
-
-        String[] cancelTimeArray = cancelTimeArrayString.split(";");
-        for (String timeAsString : cancelTimeArray) {
-            long time = Long.parseLong(timeAsString);
-            long diff = now - time;
-
-            if (diff <= FIFTEEN_MINUTES) {
-                newCancelTimeArray.add(time);
-            }
-        }
-
-        saveCancelTime(newCancelTimeArray);
-
-        return newCancelTimeArray.size() >= CANCELLATION_LIMIT;
-
-    }
-
-    private void saveCancelTime(ArrayList<Number> cancelTimeArray) {
-        SharedPreferences sharedPreferences = getSharedPreferences();
-        SharedPreferences.Editor preferences = sharedPreferences.edit();
-
-        String cancelTimeString = TextUtils.join(";", cancelTimeArray);
-
-        preferences.putString(Constants.PREF_CANCEL_TIME_ARRAY_STRING, cancelTimeString);
-        preferences.apply();
     }
 
     private String getSuccessMessageForOneTapLogin(JSONObject userInfo) {
@@ -434,7 +389,7 @@ mAuth.signOut();
     }
 
     private SharedPreferences getSharedPreferences() {
-        return mContext.getSharedPreferences(Constants.PREF_FILENAME, Context.MODE_PRIVATE);
+         return mContext.getSharedPreferences(Constants.PREF_FILENAME, Context.MODE_PRIVATE);
     }
 
     private void getAuthToken(Activity activity, Account account, boolean retry, AccessTokenCallback callback) {
