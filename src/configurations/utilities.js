@@ -61,6 +61,8 @@ function getSourceFolderPath(context, wwwPath) {
     }
   }
 
+  console.log("sourceFolderPath:" + sourceFolderPath);
+
   return sourceFolderPath;
 }
 
