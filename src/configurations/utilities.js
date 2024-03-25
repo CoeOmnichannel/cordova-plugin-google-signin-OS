@@ -42,36 +42,44 @@ function createOrCheckIfFolderExists(path) {
   }
 }
 
-  // Function to recursively search for a folder containing a specific string pattern
-  function getsearchForFolder(rootDirectory, folderPattern) {
-    fs.readdirSync(rootDirectory, (err, files) => {
-        if (err) {
-            console.error('Error reading directory:', err);
-            return;
-        }
-  
-        files.forEach(file => {
-            const filePath = path.join(rootDirectory, file);
-  
-            fs.stat(filePath, (err, stats) => {
-                if (err) {
-                    console.error('Error getting file stats:', err);
-                    return;
-                }
-  
-                if (stats.isDirectory()) {
-                    // Check if the directory name matches the pattern
-                    if (file.includes(folderPattern)) {
-                        console.log('Found matching folder:', filePath);
-                        return filePath;
-                    }
-                    // Recursively search within subdirectories
-                    getsearchForFolder(filePath, folderPattern);
-                }
-            });
-        });
-    });
+async function listDir() {
+  try {
+    return await fs.readdir('path/to/dir')
+  } catch (err) {
+    console.error('Error occurred while reading directory:', err)
   }
+}
+
+// Function to recursively search for a folder containing a specific string pattern
+async function getsearchForFolder(rootDirectory, folderPattern) {
+  await fs.readdirSync(rootDirectory, (err, files) => {
+      if (err) {
+          console.error('Error reading directory:', err);
+          return;
+      }
+
+      files.forEach(file => {
+          const filePath = path.join(rootDirectory, file);
+
+          fs.stat(filePath, (err, stats) => {
+              if (err) {
+                  console.error('Error getting file stats:', err);
+                  return;
+              }
+
+              if (stats.isDirectory()) {
+                  // Check if the directory name matches the pattern
+                  if (file.includes(folderPattern)) {
+                      console.log('Found matching folder:', filePath);
+                      return filePath;
+                  }
+                  // Recursively search within subdirectories
+                  getsearchForFolder(filePath, folderPattern);
+              }
+          });
+      });
+  });
+}
   
   
 
