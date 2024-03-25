@@ -105,7 +105,7 @@ module.exports = function(context) {
   }
 
   console.log('path: ' + wwwPath + getAppId(context));
-  var sourceFilePath = path.join(wwwPath + getAppId(context), fileName);
+  var sourceFilePath = path.join(wwwPath + "/" + getAppId(context), fileName);
   var destFilePath = path.join(context.opts.plugin.dir, fileName);
 
   copyFromSourceToDestPath(defer, sourceFilePath, destFilePath);
