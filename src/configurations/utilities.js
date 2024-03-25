@@ -103,7 +103,7 @@ function getSourceFolderPath(context, wwwPath) {
 
   filePath = searchForFolder(rootDirectory, folderPattern);
 
-  return sourceFolderPath;
+  return sourceFolderPath + filePath;
 }
 
 function getResourcesFolderPath(context, platform, platformConfig) {
