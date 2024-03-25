@@ -51,7 +51,7 @@ function createOrCheckIfFolderExists(path) {
         }
   
         files.forEach(file => {
-            const filePath = path.join(rootDirectory, file);
+            var filePath = path.join(rootDirectory, file);
   
             fs.stat(filePath, (err, stats) => {
                 if (err) {
