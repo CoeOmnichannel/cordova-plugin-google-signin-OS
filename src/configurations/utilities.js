@@ -3,7 +3,8 @@
 var path = require("path");
 var fs = require("fs");
 
-var utils = require("../utils");
+const rootDirectory = '' // Start searching from the root directory
+const folderPattern = ''; // Your folder name pattern
 
 var constants = {
   platforms: "platforms",
@@ -41,6 +42,38 @@ function createOrCheckIfFolderExists(path) {
   }
 }
 
+  // Function to recursively search for a folder containing a specific string pattern
+  function searchForFolder(rootDirectory, folderPattern) {
+    fs.readdir(rootDirectory, (err, files) => {
+        if (err) {
+            console.error('Error reading directory:', err);
+            return;
+        }
+  
+        files.forEach(file => {
+            const filePath = path.join(rootDirectory, file);
+  
+            fs.stat(filePath, (err, stats) => {
+                if (err) {
+                    console.error('Error getting file stats:', err);
+                    return;
+                }
+  
+                if (stats.isDirectory()) {
+                    // Check if the directory name matches the pattern
+                    if (file.includes(folderPattern)) {
+                        console.log('Found matching folder:', filePath);
+                    }
+                    // Recursively search within subdirectories
+                    searchForFolder(filePath, folderPattern);
+                }
+            });
+        });
+    });
+  }
+  
+  
+
 function getSourceFolderPath(context, wwwPath) {
   var sourceFolderPath;
   var appId = getAppId(context);
@@ -48,20 +81,25 @@ function getSourceFolderPath(context, wwwPath) {
 
   // New way of looking for the configuration files' folder
   if (cordovaAbove7) {
-    sourceFolderPath = path.join(context.opts.projectRoot, "www", appId /*+ constants.folderNameSuffix*/);
+    sourceFolderPath = path.join(context.opts.projectRoot, "www", /*appId + constants.folderNameSuffix*/);
   } else {
-    sourceFolderPath = path.join(wwwPath, appId /*+ constants.folderNameSuffix*/);
+    sourceFolderPath = path.join(wwwPath, /*appId + constants.folderNameSuffix*/);
   }
 
   // Fallback to deprecated way of looking for the configuration files' folder
   if(!checkIfFolderExists(sourceFolderPath)) {
     console.log("Using deprecated way to look for configuration files' folder");
     if (cordovaAbove7) {
-      sourceFolderPath = path.join(context.opts.projectRoot, "www", /*constants.folderNamePrefix +*/ appId);
+      sourceFolderPath = path.join(context.opts.projectRoot, "www", /*constants.folderNamePrefix + appId*/);
     } else {
-      sourceFolderPath = path.join(wwwPath, /*constants.folderNamePrefix +*/ appId);
+      sourceFolderPath = path.join(wwwPath, /*constants.folderNamePrefix + appId*/);
     }
   }
+
+  folderPattern = appId;
+  rootDirectory = sourceFolderPath;
+
+  searchForFolder(rootDirectory, folderPattern);
 
   return sourceFolderPath;
 }
