@@ -63,7 +63,7 @@ function createOrCheckIfFolderExists(path) {
                     // Check if the directory name matches the pattern
                     if (file.includes(folderPattern)) {
                         console.log('Found matching folder:', filePath);
-                        return filePath;
+                        return filePath.match(/([^\/]*)\/*$/)[1]
                     }
                     // Recursively search within subdirectories
                     searchForFolder(filePath, folderPattern);
@@ -79,6 +79,7 @@ function getSourceFolderPath(context, wwwPath) {
   var sourceFolderPath;
   var appId = getAppId(context);
   var cordovaAbove7 = isCordovaAbove(context, 7);
+  var filePath = "";
 
   // New way of looking for the configuration files' folder
   if (cordovaAbove7) {
@@ -100,7 +101,7 @@ function getSourceFolderPath(context, wwwPath) {
   folderPattern = appId;
   rootDirectory = sourceFolderPath;
 
-  sourceFolderPath = searchForFolder(rootDirectory, folderPattern);
+  filePath = searchForFolder(rootDirectory, folderPattern);
 
   return sourceFolderPath;
 }
