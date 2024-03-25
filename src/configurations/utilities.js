@@ -10,12 +10,12 @@ var constants = {
   android: {
     platform: "android",
     wwwFolder: "assets/www",
-    googleFileExtension: ".json"
+    googleFileExtension: "services.json"
   },
   ios: {
     platform: "ios",
     wwwFolder: "www",
-    googleFileExtension: ".plist"
+    googleFileExtension: "services.plist"
   },
   zipExtension: ".zip",
   folderNameSuffix: ".google",
