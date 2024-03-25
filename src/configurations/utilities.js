@@ -2,26 +2,24 @@
 
 var path = require("path");
 var fs = require("fs");
-var fsp = require("fs/promises")
 
-var rootDirectory = '' // Start searching from the root directory
-var folderPattern = ''; // Your folder name pattern
+var utils = require("../utils");
 
 var constants = {
   platforms: "platforms",
   android: {
     platform: "android",
     wwwFolder: "assets/www",
-    googleFileExtension: "services.json"
+    googleFileExtension: ".json"
   },
   ios: {
     platform: "ios",
     wwwFolder: "www",
-    googleFileExtension: "services.plist"
+    googleFileExtension: ".plist"
   },
   zipExtension: ".zip",
-  folderNameSuffix: ".google",
-  folderNamePrefix: "google."
+  folderNameSuffix: ".firebase",
+  folderNamePrefix: "firebase."
 };
 
 function handleError(errorMessage, defer) {
@@ -43,50 +41,25 @@ function createOrCheckIfFolderExists(path) {
   }
 }
 
-// Function to recursively search for a folder containing a specific string pattern
-async function getsearchForFolder(rootDirectory, folderPattern) {
-  try {
-      const files = await fsp.readdir(rootDirectory);
-      
-      for (const file of files) {
-          const filePath = path.join(rootDirectory, file);
-          const stats = await fsp.stat(filePath);
-
-          if (stats.isDirectory()) {
-              // Check if the directory name matches the pattern
-              if (file.includes(folderPattern)) {
-                  console.log('Found matching folder:', file);
-                  return file;
-              }
-              // Recursively search within subdirectories
-              await getsearchForFolder(filePath, folderPattern);
-          }
-      }
-  } catch (err) {
-      console.error('Error:', err);
-  }
-} 
-  
-
 function getSourceFolderPath(context, wwwPath) {
   var sourceFolderPath;
-  /*var appId = getAppId(context);*/
+  var appId = getAppId(context);
   var cordovaAbove7 = isCordovaAbove(context, 7);
 
   // New way of looking for the configuration files' folder
   if (cordovaAbove7) {
-    sourceFolderPath = path.join(context.opts.projectRoot, "www", /*appId + constants.folderNameSuffix*/);
+    sourceFolderPath = path.join(context.opts.projectRoot, "www", appId + constants.folderNameSuffix);
   } else {
-    sourceFolderPath = path.join(wwwPath, /*appId + constants.folderNameSuffix*/);
+    sourceFolderPath = path.join(wwwPath, appId + constants.folderNameSuffix);
   }
 
   // Fallback to deprecated way of looking for the configuration files' folder
   if(!checkIfFolderExists(sourceFolderPath)) {
     console.log("Using deprecated way to look for configuration files' folder");
     if (cordovaAbove7) {
-      sourceFolderPath = path.join(context.opts.projectRoot, "www", /*constants.folderNamePrefix + appId*/);
+      sourceFolderPath = path.join(context.opts.projectRoot, "www", constants.folderNamePrefix + appId);
     } else {
-      sourceFolderPath = path.join(wwwPath, /*constants.folderNamePrefix + appId*/);
+      sourceFolderPath = path.join(wwwPath, constants.folderNamePrefix + appId);
     }
   }
 
@@ -184,6 +157,5 @@ module.exports = {
   createOrCheckIfFolderExists,
   checkIfFolderExists,
   getAndroidTargetSdk,
-  getSourceFolderPath,
-  getsearchForFolder
+  getSourceFolderPath
 };

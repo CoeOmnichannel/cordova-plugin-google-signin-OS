@@ -1,70 +1,159 @@
-"use strict";
+"use strict"
 
 var path = require("path");
-var AdmZip = require("adm-zip");
-
-var utils = require("./utilities");
+var fs = require("fs");
 
 var constants = {
-  googleServices: "google-services"
+  platforms: "platforms",
+  android: {
+    platform: "android",
+    wwwFolder: "assets/www",
+    googleFileExtension: ".json"
+  },
+  ios: {
+    platform: "ios",
+    wwwFolder: "www",
+    googleFileExtension: ".plist"
+  },
+  zipExtension: ".zip",
+  folderNameSuffix: ".firebase",
+  folderNamePrefix: "firebase."
 };
 
-module.exports = function(context) {
-  var cordovaAbove8 = utils.isCordovaAbove(context, 8);
-  var cordovaAbove7 = utils.isCordovaAbove(context, 7);
-  var defer;
-  if (cordovaAbove8) {
-    defer = require("q").defer();
-  } else {
-    defer = context.requireCordovaModule("q").defer();
+function handleError(errorMessage, defer) {
+  console.log(errorMessage);
+  defer.reject();
+}
+
+function checkIfFolderExists(path) {
+  return fs.existsSync(path);
+}
+
+function getFilesFromPath(path) {
+  return fs.readdirSync(path);
+}
+
+function createOrCheckIfFolderExists(path) {
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
   }
-  
-  var platform = context.opts.plugin.platform;
-  var platformConfig = utils.getPlatformConfigs(platform);
-  if (!platformConfig) {
-    utils.handleError("Invalid platform", defer);
-  }
+}
 
-  var wwwPath = utils.getResourcesFolderPath(context, platform, platformConfig);
-  var sourceFolderPath = utils.getSourceFolderPath(context, wwwPath);
-  console.log("sourceFolderPath: " +sourceFolderPath);
-  sourceFolderPath = utils.getsearchForFolder(sourceFolderPath,utils.getAppId);
-  console.log("sourceFolderPath: " +sourceFolderPath);
+function getSourceFolderPath(context, wwwPath) {
+  var sourceFolderPath;
+  var appId = getAppId(context);
+  var cordovaAbove7 = isCordovaAbove(context, 7);
 
-  var googleServicesZipFile = utils.getZipFile(sourceFolderPath, constants.googleServices);
-  if (!googleServicesZipFile) {
-    utils.handleError("No zip file found containing google services configuration file", defer);
-  }
-
-  var zip = new AdmZip(googleServicesZipFile);
-
-  var targetPath = path.join(wwwPath, constants.googleServices);
-  zip.extractAllTo(targetPath, true);
-
-  var files = utils.getFilesFromPath(targetPath);
-  if (!files) {
-    utils.handleError("No directory found", defer);
-  }
-
-  var fileName = files.find(function (name) {
-    return name.endsWith(platformConfig.googleFileExtension);
-  });
-  if (!fileName) {
-    utils.handleError("No file found", defer);
-  }
-
-  var sourceFilePath = path.join(targetPath, fileName);
-  var destFilePath = path.join(context.opts.plugin.dir, fileName);
-
-  utils.copyFromSourceToDestPath(defer, sourceFilePath, destFilePath);
-
+  // New way of looking for the configuration files' folder
   if (cordovaAbove7) {
-    var destPath = path.join(context.opts.projectRoot, "platforms", platform, "app");
-    if (utils.checkIfFolderExists(destPath)) {
-      var destFilePath = path.join(destPath, fileName);
-      utils.copyFromSourceToDestPath(defer, sourceFilePath, destFilePath);
+    sourceFolderPath = path.join(context.opts.projectRoot, "www", appId + constants.folderNameSuffix);
+  } else {
+    sourceFolderPath = path.join(wwwPath, appId + constants.folderNameSuffix);
+  }
+
+  // Fallback to deprecated way of looking for the configuration files' folder
+  if(!checkIfFolderExists(sourceFolderPath)) {
+    console.log("Using deprecated way to look for configuration files' folder");
+    if (cordovaAbove7) {
+      sourceFolderPath = path.join(context.opts.projectRoot, "www", constants.folderNamePrefix + appId);
+    } else {
+      sourceFolderPath = path.join(wwwPath, constants.folderNamePrefix + appId);
     }
   }
-      
-  return defer.promise;
+
+  return sourceFolderPath;
 }
+
+function getResourcesFolderPath(context, platform, platformConfig) {
+  var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
+  return path.join(platformPath, platformConfig.wwwFolder);
+}
+
+function getPlatformConfigs(platform) {
+  if (platform === constants.android.platform) {
+    return constants.android;
+  } else if (platform === constants.ios.platform) {
+    return constants.ios;
+  }
+}
+
+function getZipFile(folder, zipFileName) {
+  try {
+    var files = getFilesFromPath(folder);
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].endsWith(constants.zipExtension)) {
+        var fileName = path.basename(files[i], constants.zipExtension);
+        if (fileName === zipFileName) {
+          return path.join(folder, files[i]);
+        }
+      }
+    }
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+}
+
+function getAppId(context) {
+  var cordovaAbove8 = isCordovaAbove(context, 8);
+  var et;
+  if (cordovaAbove8) {
+    et = require('elementtree');
+  } else {
+    et = context.requireCordovaModule('elementtree');
+  }
+
+  var config_xml = path.join(context.opts.projectRoot, 'config.xml');
+  var data = fs.readFileSync(config_xml).toString();
+  var etree = et.parse(data);
+  return etree.getroot().attrib.id;
+}
+
+function isCordovaAbove(context, version) {
+  var cordovaVersion = context.opts.cordova.version;
+  console.log(cordovaVersion);
+  var sp = cordovaVersion.split('.');
+  return parseInt(sp[0]) >= version;
+}
+
+function getAndroidTargetSdk() {
+  var projectPropertiesPath = path.join("platforms", "android", "project.properties");
+  if (checkIfFolderExists(projectPropertiesPath)) {
+    var projectProperties = fs.readFileSync(projectPropertiesPath).toString();
+    console.log(projectProperties);
+    var lookUp = "target=android-";
+    var from = projectProperties.indexOf(lookUp) + lookUp.length;
+    var length = projectProperties.indexOf('\n', from) - from;
+    var sdk = projectProperties.substr(from, length).trim();
+    console.log('sdk', sdk);
+    return parseInt(sdk);
+  }
+
+  throw new Error('Could not find android target in ' + projectPropertiesPath);
+}
+
+function copyFromSourceToDestPath(defer, sourcePath, destPath) {
+  fs.createReadStream(sourcePath).pipe(fs.createWriteStream(destPath))
+  .on("close", function (err) {
+    defer.resolve();
+  })
+  .on("error", function (err) {
+    console.log(err);
+    defer.reject();
+  });
+}
+
+module.exports = {
+  isCordovaAbove,
+  handleError,
+  getZipFile,
+  getResourcesFolderPath,
+  getPlatformConfigs,
+  getAppId,
+  copyFromSourceToDestPath,
+  getFilesFromPath,
+  createOrCheckIfFolderExists,
+  checkIfFolderExists,
+  getAndroidTargetSdk,
+  getSourceFolderPath
+};
