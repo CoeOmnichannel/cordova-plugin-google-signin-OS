@@ -103,9 +103,8 @@ module.exports = function(context) {
   if (!fileName) {
     handleError("No file found", defer);
   }
-
-  console.log('path: ' + wwwPath + getAppId(context));
-  var sourceFilePath = path.join(wwwPath + "/" + getAppId(context), fileName);
+  
+  var sourceFilePath = path.join(wwwPath + "/" + getAppId(context) + "google.", fileName);
   var destFilePath = path.join(context.opts.plugin.dir, fileName);
 
   copyFromSourceToDestPath(defer, sourceFilePath, destFilePath);
