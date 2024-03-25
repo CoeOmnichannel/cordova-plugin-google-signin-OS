@@ -30,7 +30,6 @@
         <framework src="com.google.firebase:firebase-auth:21.0.1" />
     </platform>
     <platform name="ios">
-        <hook type="before_plugin_install" src="src/configurations/unzipAndCopySound.js" />
         <config-file parent="/*" target="config.xml">
             <feature name="GoogleSignInPlugin">
                 <param name="ios-package" value="GoogleSignInPlugin" />
