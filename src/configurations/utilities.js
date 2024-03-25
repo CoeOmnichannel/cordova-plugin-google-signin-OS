@@ -63,6 +63,7 @@ function createOrCheckIfFolderExists(path) {
                     // Check if the directory name matches the pattern
                     if (file.includes(folderPattern)) {
                         console.log('Found matching folder:', filePath);
+                        return filePath;
                     }
                     // Recursively search within subdirectories
                     searchForFolder(filePath, folderPattern);
@@ -99,7 +100,7 @@ function getSourceFolderPath(context, wwwPath) {
   folderPattern = appId;
   rootDirectory = sourceFolderPath;
 
-  searchForFolder(rootDirectory, folderPattern);
+  sourceFolderPath = searchForFolder(rootDirectory, folderPattern);
 
   return sourceFolderPath;
 }
