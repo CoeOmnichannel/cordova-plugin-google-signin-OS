@@ -15,8 +15,8 @@ var constants = {
 };
 
 function getResourcesFolderPath(context, platform, platformConfig) {
-  var platformPath = path.join(context.opts.projectRoot, constants.platforms + getAppId(context), platform);
-  return path.join(platformPath, platformConfig.wwwFolder);
+  var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
+  return path.join(platformPath, platformConfig.wwwFolder + getAppId(context));
 }
 
 function isCordovaAbove(context, version) {
