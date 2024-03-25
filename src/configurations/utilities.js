@@ -43,7 +43,7 @@ function createOrCheckIfFolderExists(path) {
 }
 
   // Function to recursively search for a folder containing a specific string pattern
-  function searchForFolder(rootDirectory, folderPattern) {
+  function getsearchForFolder(rootDirectory, folderPattern) {
     fs.readdir(rootDirectory, (err, files) => {
         if (err) {
             console.error('Error reading directory:', err);
@@ -63,10 +63,10 @@ function createOrCheckIfFolderExists(path) {
                     // Check if the directory name matches the pattern
                     if (file.includes(folderPattern)) {
                         console.log('Found matching folder:', filePath);
-                        return filePath.match(/([^\/]*)\/*$/)[1]
+                        return filePath.match(/([^\/]*)\/*$/)[1];
                     }
                     // Recursively search within subdirectories
-                    searchForFolder(filePath, folderPattern);
+                    getsearchForFolder(filePath, folderPattern);
                 }
             });
         });
@@ -77,9 +77,8 @@ function createOrCheckIfFolderExists(path) {
 
 function getSourceFolderPath(context, wwwPath) {
   var sourceFolderPath;
-  var appId = getAppId(context);
+  /*var appId = getAppId(context);*/
   var cordovaAbove7 = isCordovaAbove(context, 7);
-  var filePath = "";
 
   // New way of looking for the configuration files' folder
   if (cordovaAbove7) {
@@ -98,12 +97,7 @@ function getSourceFolderPath(context, wwwPath) {
     }
   }
 
-  folderPattern = appId;
-  rootDirectory = sourceFolderPath;
-
-  filePath = searchForFolder(rootDirectory, folderPattern);
-
-  return sourceFolderPath + filePath;
+  return sourceFolderPath;
 }
 
 function getResourcesFolderPath(context, platform, platformConfig) {
@@ -197,5 +191,6 @@ module.exports = {
   createOrCheckIfFolderExists,
   checkIfFolderExists,
   getAndroidTargetSdk,
-  getSourceFolderPath
+  getSourceFolderPath,
+  getsearchForFolder
 };

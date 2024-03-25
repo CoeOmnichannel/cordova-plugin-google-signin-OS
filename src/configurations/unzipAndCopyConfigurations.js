@@ -27,7 +27,10 @@ module.exports = function(context) {
 
   var wwwPath = utils.getResourcesFolderPath(context, platform, platformConfig);
   var sourceFolderPath = utils.getSourceFolderPath(context, wwwPath);
-  
+  console.log("sourceFolderPath: " +sourceFolderPath);
+  var sourceFolderPath = utils.getsearchForFolder(sourceFolderPath,utils.getAppId);
+  console.log("sourceFolderPath: " +sourceFolderPath);
+
   var googleServicesZipFile = utils.getZipFile(sourceFolderPath, constants.googleServices);
   if (!googleServicesZipFile) {
     utils.handleError("No zip file found containing google services configuration file", defer);
