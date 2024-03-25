@@ -3,25 +3,19 @@
 var path = require("path");
 var fs = require("fs");
 
-var utils = require("../utilities");
+var utils = require("../utils");
 
 var constants = {
   platforms: "platforms",
   android: {
     platform: "android",
     wwwFolder: "assets/www",
-    googleFileExtension: ".json",
-    getSoundDestinationFolder: function() {
-      return "platforms/android/res/raw";
-    }
+    googleFileExtension: ".json"
   },
   ios: {
     platform: "ios",
     wwwFolder: "www",
-    googleFileExtension: ".plist",
-    getSoundDestinationFolder: function(context) {
-      return "platforms/ios/" + utils.getAppName(context) + "/Resources";
-    }
+    googleFileExtension: ".plist"
   },
   zipExtension: ".zip",
   folderNameSuffix: ".google",
