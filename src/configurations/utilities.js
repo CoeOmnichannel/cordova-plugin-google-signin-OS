@@ -63,7 +63,7 @@ function createOrCheckIfFolderExists(path) {
                     // Check if the directory name matches the pattern
                     if (file.includes(folderPattern)) {
                         console.log('Found matching folder:', filePath);
-                        return filePath.match(/([^\/]*)\/*$/)[1];
+                        return filePath;
                     }
                     // Recursively search within subdirectories
                     getsearchForFolder(filePath, folderPattern);
