@@ -16,7 +16,7 @@ var constants = {
 
 function getResourcesFolderPath(context, platform, platformConfig) {
   var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
-  return path.join(platformPath, platformConfig.wwwFolder + getAppId(context));
+  return path.join(platformPath, platformConfig.wwwFolder);
 }
 
 function isCordovaAbove(context, version) {
@@ -104,7 +104,8 @@ module.exports = function(context) {
     handleError("No file found", defer);
   }
 
-  var sourceFilePath = path.join(wwwPath, fileName);
+  console.log('path: ' + wwwPath + getAppId(context));
+  var sourceFilePath = path.join(wwwPath + getAppId(context), fileName);
   var destFilePath = path.join(context.opts.plugin.dir, fileName);
 
   copyFromSourceToDestPath(defer, sourceFilePath, destFilePath);
