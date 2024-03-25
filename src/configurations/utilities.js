@@ -3,8 +3,8 @@
 var path = require("path");
 var fs = require("fs");
 
-const rootDirectory = '' // Start searching from the root directory
-const folderPattern = ''; // Your folder name pattern
+var rootDirectory = '' // Start searching from the root directory
+var folderPattern = ''; // Your folder name pattern
 
 var constants = {
   platforms: "platforms",
