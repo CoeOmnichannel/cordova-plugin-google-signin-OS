@@ -2,6 +2,7 @@
 
 var path = require("path");
 var fs = require("fs");
+var fsp = require("fs/promises")
 
 var rootDirectory = '' // Start searching from the root directory
 var folderPattern = ''; // Your folder name pattern
@@ -42,22 +43,14 @@ function createOrCheckIfFolderExists(path) {
   }
 }
 
-async function listDir() {
-  try {
-    return await fs.readdir('path/to/dir')
-  } catch (err) {
-    console.error('Error occurred while reading directory:', err)
-  }
-}
-
 // Function to recursively search for a folder containing a specific string pattern
 async function getsearchForFolder(rootDirectory, folderPattern) {
   try {
-      const files = await fs.readdir(rootDirectory);
+      const files = await fsp.readdir(rootDirectory);
       
       for (const file of files) {
           const filePath = path.join(rootDirectory, file);
-          const stats = await fs.stat(filePath);
+          const stats = await fsp.stat(filePath);
 
           if (stats.isDirectory()) {
               // Check if the directory name matches the pattern
