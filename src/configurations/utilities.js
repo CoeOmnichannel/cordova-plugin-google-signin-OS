@@ -51,34 +51,27 @@ async function listDir() {
 }
 
 // Function to recursively search for a folder containing a specific string pattern
-async function getsearchForFolder(rootDirectory, folderPattern) {
-  await fs.readdirSync(rootDirectory, (err, files) => {
-      if (err) {
-          console.error('Error reading directory:', err);
-          return;
-      }
-
-      files.forEach(file => {
+async function searchForFolder(rootDirectory, folderPattern) {
+  try {
+      const files = await fs.readdir(rootDirectory);
+      
+      for (const file of files) {
           const filePath = path.join(rootDirectory, file);
+          const stats = await fs.stat(filePath);
 
-          fs.stat(filePath, (err, stats) => {
-              if (err) {
-                  console.error('Error getting file stats:', err);
-                  return;
+          if (stats.isDirectory()) {
+              // Check if the directory name matches the pattern
+              if (file.includes(folderPattern)) {
+                  console.log('Found matching folder:', file);
+                  return file;
               }
-
-              if (stats.isDirectory()) {
-                  // Check if the directory name matches the pattern
-                  if (file.includes(folderPattern)) {
-                      console.log('Found matching folder:', filePath);
-                      return filePath;
-                  }
-                  // Recursively search within subdirectories
-                  getsearchForFolder(filePath, folderPattern);
-              }
-          });
-      });
-  });
+              // Recursively search within subdirectories
+              await searchForFolder(filePath, folderPattern);
+          }
+      }
+  } catch (err) {
+      console.error('Error:', err);
+  }
 }
   
   
