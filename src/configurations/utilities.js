@@ -44,7 +44,7 @@ function createOrCheckIfFolderExists(path) {
 
   // Function to recursively search for a folder containing a specific string pattern
   function getsearchForFolder(rootDirectory, folderPattern) {
-    fs.readdir(rootDirectory, (err, files) => {
+    fs.readdirSync(rootDirectory, (err, files) => {
         if (err) {
             console.error('Error reading directory:', err);
             return;
