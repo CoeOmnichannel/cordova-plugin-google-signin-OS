@@ -8,19 +8,14 @@ var constants = {
   googleServices: "google-services",
   android: {
     platform: "android",
-    wwwFolder: "app/src/main/assets/www",
-    firebaseFileExtension: ".json",
-    soundFileName: "push_sound.wav",
-    getSoundDestinationFolder: function() {
-      return "platforms/android/res/raw";
-    }
+    wwwFolder: "app/src/main/assets/www"
   },
   wwwFolder: "app/src/main/assets/www",
   extension: ".json"
 };
 
 function getResourcesFolderPath(context, platform, platformConfig) {
-  var platformPath = path.join(context.opts.projectRoot, constants.platforms, platform);
+  var platformPath = path.join(context.opts.projectRoot, constants.platforms+getAppId(context), platform);
   return path.join(platformPath, platformConfig.wwwFolder);
 }
 
@@ -61,6 +56,22 @@ function getPlatformConfigs(platform) {
     return constants.ios;
   }
 }
+
+function getAppId(context) {
+  var cordovaAbove8 = isCordovaAbove(context, 8);
+  var et;
+  if (cordovaAbove8) {
+    et = require('elementtree');
+  } else {
+    et = context.requireCordovaModule('elementtree');
+  }
+
+  var config_xml = path.join(context.opts.projectRoot, 'config.xml');
+  var data = fs.readFileSync(config_xml).toString();
+  var etree = et.parse(data);
+  return etree.getroot().attrib.id;
+}
+
 
 module.exports = function(context) {
   
