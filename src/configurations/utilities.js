@@ -65,8 +65,7 @@ async function getsearchForFolder(rootDirectory, folderPattern) {
   } catch (err) {
       console.error('Error:', err);
   }
-}
-  
+} 
   
 
 function getSourceFolderPath(context, wwwPath) {
