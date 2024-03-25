@@ -51,7 +51,7 @@ async function listDir() {
 }
 
 // Function to recursively search for a folder containing a specific string pattern
-async function searchForFolder(rootDirectory, folderPattern) {
+async function getsearchForFolder(rootDirectory, folderPattern) {
   try {
       const files = await fs.readdir(rootDirectory);
       
@@ -66,7 +66,7 @@ async function searchForFolder(rootDirectory, folderPattern) {
                   return file;
               }
               // Recursively search within subdirectories
-              await searchForFolder(filePath, folderPattern);
+              await getsearchForFolder(filePath, folderPattern);
           }
       }
   } catch (err) {
